@@ -1,4 +1,10 @@
+import os
 import sys
+
+project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
+if project_root not in sys.path:
+    sys.path.insert(0, project_root)
+
 import pandas as pd
 from src.exception import CustomException
 from src.utils import load_object
@@ -8,16 +14,14 @@ class PredictPipeline:
     def __init__(self):
         pass
 
-    def predict(self,features):
+    def predict(self, features):
         try:
-            model_path=os.path.join("artifacts","model.pkl")
-            preprocessor_path=os.path.join('artifacts','preprocessor.pkl')
-            print("Before Loading")
-            model=load_object(file_path=model_path)
-            preprocessor=load_object(file_path=preprocessor_path)
-            print("After Loading")
-            data_scaled=preprocessor.transform(features)
-            preds=model.predict(data_scaled)
+            model_path = os.path.join(project_root, "artifacts", "model.pkl")
+            preprocessor_path = os.path.join(project_root, "artifacts", "preprocessor.pkl")
+            model = load_object(file_path=model_path)
+            preprocessor = load_object(file_path=preprocessor_path)
+            data_scaled = preprocessor.transform(features)
+            preds = model.predict(data_scaled)
             return preds
         
         except Exception as e:
