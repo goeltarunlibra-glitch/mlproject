@@ -6,8 +6,24 @@ if project_root not in sys.path:
     sys.path.insert(0, project_root)
 
 import pandas as pd
+from sklearn.impute import SimpleImputer
 from src.exception import CustomException
 from src.utils import load_object
+
+
+def _restore_imputer_state(transformer):
+    if isinstance(transformer, SimpleImputer):
+        if not hasattr(transformer, "_fill_dtype") and hasattr(transformer, "_fit_dtype"):
+            transformer._fill_dtype = transformer._fit_dtype
+        return
+
+    if hasattr(transformer, "transformers_"):
+        for _, fitted_transformer, _ in transformer.transformers_:
+            _restore_imputer_state(fitted_transformer)
+
+    if hasattr(transformer, "steps"):
+        for _, step in transformer.steps:
+            _restore_imputer_state(step)
 
 
 class PredictPipeline:
@@ -20,6 +36,7 @@ class PredictPipeline:
             preprocessor_path = os.path.join(project_root, "artifacts", "preprocessor.pkl")
             model = load_object(file_path=model_path)
             preprocessor = load_object(file_path=preprocessor_path)
+            _restore_imputer_state(preprocessor)
             data_scaled = preprocessor.transform(features)
             preds = model.predict(data_scaled)
             return preds
