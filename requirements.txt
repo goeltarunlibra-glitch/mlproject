@@ -6,6 +6,7 @@ scikit-learn==1.7.2
 catboost
 xgboost
 flask
+gunicorn
 dill
 
 #-e .
